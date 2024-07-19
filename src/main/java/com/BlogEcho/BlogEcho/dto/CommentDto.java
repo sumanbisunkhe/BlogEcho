@@ -1,5 +1,6 @@
 package com.BlogEcho.BlogEcho.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ public class CommentDto {
 
     private Long authorId;
     private Long blogId;
+    @JsonFormat(pattern = "EEEE MMMM dd, yyyy HH:mm")
     private LocalDateTime createdDate;
 
     // Constructors

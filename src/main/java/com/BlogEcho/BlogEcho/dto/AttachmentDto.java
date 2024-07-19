@@ -1,5 +1,6 @@
 package com.BlogEcho.BlogEcho.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.LocalDateTime;
@@ -10,6 +11,8 @@ public class AttachmentDto {
     private String fileName;
     private String fileType;
     private byte[] data;
+
+    @JsonFormat(pattern = "EEEE MMMM dd, yyyy HH:mm")
     private LocalDateTime uploadedDate;
     private String filePath;
 

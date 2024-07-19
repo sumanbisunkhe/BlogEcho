@@ -1,5 +1,6 @@
 package com.BlogEcho.BlogEcho.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -28,6 +29,7 @@ public class Attachment {
     @JoinColumn(name = "blog_id", nullable = false)
     private Blog blog;
 
+    @JsonFormat(pattern = "EEEE MMMM dd, yyyy HH:mm")
     private LocalDateTime uploadedDate;
 
     @Column(name = "file_path")

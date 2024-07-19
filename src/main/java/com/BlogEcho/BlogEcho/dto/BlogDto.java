@@ -1,6 +1,7 @@
 package com.BlogEcho.BlogEcho.dto;
 
 import com.BlogEcho.BlogEcho.model.Comment;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.OneToMany;
@@ -20,7 +21,9 @@ public class BlogDto {
     @NotBlank(message = "Content cannot be blank")
     private String content;
     private Long authorId;
+    @JsonFormat(pattern = "EEEE MMMM dd, yyyy HH:mm")
     private LocalDateTime createdDate;
+    @JsonFormat(pattern = "EEEE MMMM dd, yyyy HH:mm")
     private LocalDateTime modifiedDate;
     private List<MultipartFile> attachments; // Example for handling attachments
     @OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)

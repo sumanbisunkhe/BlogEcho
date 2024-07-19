@@ -2,6 +2,7 @@ package com.BlogEcho.BlogEcho.model;
 
 import com.BlogEcho.BlogEcho.enums.Gender;
 import com.BlogEcho.BlogEcho.enums.Role;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
@@ -37,6 +38,7 @@ public class User implements UserDetails {
     private Role role;
     private boolean enabled;
     private String otpCode;
+    @JsonFormat(pattern = "EEEE MMMM dd, yyyy HH:mm")
     private LocalDateTime otpExpiryTime;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
