@@ -26,6 +26,7 @@ public class UserDto {
     private String country;
 
     @Email(message = "Email should be valid")
+    @NotEmpty
     private String email;
 
     @NotBlank(message = "Password is required")

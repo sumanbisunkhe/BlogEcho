@@ -9,6 +9,8 @@ import com.BlogEcho.BlogEcho.model.User;
 import com.BlogEcho.BlogEcho.repo.UserRepo;
 import com.BlogEcho.BlogEcho.service.UserService;
 import com.BlogEcho.BlogEcho.util.JwtUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -31,6 +33,8 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender javaMailSender;
     private final JwtUtil jwtUtil;
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
 
     @Autowired
     public UserServiceImpl(UserRepo userRepo, PasswordEncoder passwordEncoder, JavaMailSender javaMailSender, JwtUtil jwtUtil) {
@@ -42,22 +46,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-
-        // Check if the email or username already exists
+// Check if the email or username already exists
         Optional<User> existingUserByEmail = userRepo.findByEmail(userDto.getEmail());
         Optional<User> existingUserByUsername = userRepo.findByUsername(userDto.getUsername());
 
-        existingUserByEmail.ifPresent(user -> {
-            if (user.isEnabled()) {
+        if (existingUserByEmail.isPresent()) {
+            User existingUser = existingUserByEmail.get();
+            if (existingUser.isEnabled()) {
                 throw new UserAlreadyExistsException("Email already exists.");
+            } else {
+                // If the user with the email exists but is not enabled, resend the OTP
+                logger.info("User with email {} exists but is not enabled. Requesting OTP verification.", userDto.getEmail());
+                sendOtpByEmail(existingUser.getEmail(), existingUser.getOtpCode());
+                return convertToDto(existingUser);
             }
-        });
+        }
 
-        existingUserByUsername.ifPresent(user -> {
-            if (user.isEnabled()) {
-                throw new UserAlreadyExistsException("Username already exists.");
-            }
-        });
+        if (existingUserByUsername.isPresent()) {
+            throw new UserAlreadyExistsException("Username already exists.");
+        }
 
 
         User user = new User();

@@ -17,9 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "users")
-@JsonInclude(JsonInclude.Include.NON_NULL) // Include only non-null properties in JSON
 public class User implements UserDetails {
 
     @Id
