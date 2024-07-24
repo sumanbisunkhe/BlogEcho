@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 
 # BlogEcho Application
@@ -207,3 +208,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ---
 
 This README.md provides an extensive overview of the BlogEcho application, detailing its features, APIs, technologies used, setup instructions, and more. Adjust the content further based on your project's specific details and requirements.
+=======
+# BlogEcho
+>>>>>>> 045fadb489eae83c98031a77e29b052034e0a137
