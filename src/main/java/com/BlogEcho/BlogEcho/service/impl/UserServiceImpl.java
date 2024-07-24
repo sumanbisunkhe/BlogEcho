@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public String login(String username, String password) {
         Optional<User> userOptional = userRepo.findByUsername(username);
-        if (!userOptional.isPresent() || !passwordEncoder.matches(password, userOptional.get().getPassword())) {
+        if (userOptional.isEmpty() || !passwordEncoder.matches(password, userOptional.get().getPassword())) {
             throw new UserNotFoundException("Invalid username or password");
         }
 
