@@ -17,7 +17,15 @@ import java.util.Collections;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(
+        name = "users",
+        uniqueConstraints={
+                @UniqueConstraint(name = "UNIQUE_username",columnNames ="username" ),
+                @UniqueConstraint(name = "UNIQUE_email",columnNames ="email" )
+
+}
+
+)
 public class User implements UserDetails {
 
     @Id
