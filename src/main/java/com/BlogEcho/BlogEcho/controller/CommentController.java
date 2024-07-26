@@ -8,12 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/comments")
@@ -55,29 +56,44 @@ public class CommentController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<CommentDto>> getAllComments() {
+    public ResponseEntity<Map<String, Object>> getAllComments() {
         List<CommentDto> comments = commentService.getAllComments();
-        return new ResponseEntity<>(comments, HttpStatus.OK);
+        Map<String, Object> response = Map.of(
+                "message", "Comments fetched successfully.",
+                "data", comments
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CommentDto> getCommentById(@PathVariable Long id) {
-        Optional<CommentDto> commentDto = commentService.getCommentById(id);
-        return commentDto
-                .map(ResponseEntity::ok)
+    public ResponseEntity<Map<String, Object>> getCommentById(@PathVariable Long id) {
+        CommentDto commentDto = commentService.getCommentById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found with id: " + id));
+        Map<String, Object> response = Map.of(
+                "message", "Comment fetched successfully.",
+                "data", commentDto
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/blog/{blogId}")
-    public ResponseEntity<List<CommentDto>> getCommentsByBlogId(@PathVariable Long blogId) {
+    public ResponseEntity<Map<String, Object>> getCommentsByBlogId(@PathVariable Long blogId) {
         List<CommentDto> comments = commentService.getCommentsByBlogId(blogId);
-        return new ResponseEntity<>(comments, HttpStatus.OK);
+        Map<String, Object> response = Map.of(
+                "message", "Comments for blog ID " + blogId + " fetched successfully.",
+                "data", comments
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/author/{authorId}")
-    public ResponseEntity<List<CommentDto>> getCommentsByAuthorId(@PathVariable Long authorId) {
+    public ResponseEntity<Map<String, Object>> getCommentsByAuthorId(@PathVariable Long authorId) {
         List<CommentDto> comments = commentService.getCommentsByAuthorId(authorId);
-        return new ResponseEntity<>(comments, HttpStatus.OK);
+        Map<String, Object> response = Map.of(
+                "message", "Comments by author ID " + authorId + " fetched successfully.",
+                "data", comments
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -90,8 +106,9 @@ public class CommentController {
     }
 
     private ResponseEntity<Map<String, Object>> handleValidationErrors(BindingResult bindingResult) {
-        Map<String, Object> errors = new HashMap<>();
-        bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+        List<String> errors = bindingResult.getFieldErrors().stream()
+                .map(FieldError::getDefaultMessage)
+                .collect(Collectors.toList());
         Map<String, Object> response = Map.of(
                 "message", "Validation errors",
                 "errors", errors

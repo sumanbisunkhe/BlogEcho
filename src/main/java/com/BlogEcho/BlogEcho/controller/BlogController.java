@@ -2,7 +2,6 @@ package com.BlogEcho.BlogEcho.controller;
 
 import com.BlogEcho.BlogEcho.dto.BlogDto;
 import com.BlogEcho.BlogEcho.exceptions.ResourceNotFoundException;
-import com.BlogEcho.BlogEcho.model.Blog;
 import com.BlogEcho.BlogEcho.model.User;
 import com.BlogEcho.BlogEcho.service.AttachmentService;
 import com.BlogEcho.BlogEcho.service.BlogService;
@@ -13,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,8 +32,9 @@ public class BlogController {
         this.userService = userService;
         this.attachmentService = attachmentService;
     }
+
     @PostMapping("/create")
-    public ResponseEntity<Map<String, Object>> createBlog(@Valid BlogDto blogDto, BindingResult bindingResult) {
+    public ResponseEntity<Map<String, Object>> createBlog(@Valid @RequestBody BlogDto blogDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return handleValidationErrors(bindingResult);
         }
@@ -57,7 +56,7 @@ public class BlogController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> updateBlog(@PathVariable Long id, @Valid BlogDto blogDto, BindingResult bindingResult) {
+    public ResponseEntity<Map<String, Object>> updateBlog(@PathVariable Long id, @Valid @RequestBody BlogDto blogDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return handleValidationErrors(bindingResult);
         }
@@ -82,14 +81,6 @@ public class BlogController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
-
-    // Helper method to handle validation errors
-    private ResponseEntity<Map<String, Object>> handleValidationErrors(BindingResult bindingResult) {
-        Map<String, Object> validationErrors = new HashMap<>();
-        bindingResult.getFieldErrors().forEach(error -> validationErrors.put(error.getField(), error.getDefaultMessage()));
-        return ResponseEntity.badRequest().body(validationErrors);
-    }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getBlogById(@PathVariable Long id) {
@@ -142,5 +133,15 @@ public class BlogController {
             );
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
+    }
+
+    private ResponseEntity<Map<String, Object>> handleValidationErrors(BindingResult bindingResult) {
+        Map<String, Object> validationErrors = new HashMap<>();
+        bindingResult.getFieldErrors().forEach(error -> validationErrors.put(error.getField(), error.getDefaultMessage()));
+        Map<String, Object> response = Map.of(
+                "message", "Validation errors",
+                "errors", validationErrors
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }

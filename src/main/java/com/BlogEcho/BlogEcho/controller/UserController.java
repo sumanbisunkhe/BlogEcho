@@ -14,7 +14,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
@@ -26,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Controller
+@RestController
 @RequestMapping("/api/user")
 @Validated
 public class UserController {
@@ -55,8 +54,6 @@ public class UserController {
             return ResponseEntity.badRequest().body(response);
         }
 
-
-
         UserDto createdUser = userService.createUser(userDto);
 
         if (userDto.getOtpCode() != null) {
@@ -81,18 +78,18 @@ public class UserController {
         );
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
     @PostMapping("/login")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword())
             );
         } catch (BadCredentialsException e) {
-            throw new Exception("Incorrect username or password", e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Incorrect username or password"));
         }
 
         final UserDetails userDetails = userService.loadUserByUsername(authenticationRequest.getUsername());
-
         final String jwt = jwtUtil.generateToken(userDetails.getUsername());
 
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
@@ -175,22 +172,23 @@ public class UserController {
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> otpRequest) {
+    public ResponseEntity<Map<String, Object>> verifyOtp(@RequestBody Map<String, String> otpRequest) {
         String email = otpRequest.get("email");
         String otp = otpRequest.get("otp_code");
 
         boolean isVerified = userService.verifyOtp(email, otp);
         if (isVerified) {
-            return ResponseEntity.ok("Email verified successfully. User registration is complete.");
+            Map<String, Object> response = Map.of(
+                    "message", "Email verified successfully. User registration is complete."
+            );
+            return ResponseEntity.ok(response);
         } else {
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.WWW_AUTHENTICATE, "OTP realm=\"example\"");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .headers(headers)
-                    .body("Invalid or expired OTP.");
+            Map<String, Object> response = Map.of(
+                    "message", "Invalid or expired OTP."
+            );
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).headers(headers).body(response);
         }
     }
-
-
 }
-

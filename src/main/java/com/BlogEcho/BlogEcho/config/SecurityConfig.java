@@ -1,6 +1,7 @@
 package com.BlogEcho.BlogEcho.config;
 
 import com.BlogEcho.BlogEcho.filter.JwtRequestFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -39,10 +44,10 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(handler -> handler
                         .authenticationEntryPoint((request, response, authException) -> {
-                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication is required to access this resource.");
+                            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Authentication is required to access this resource.");
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.sendError(HttpServletResponse.SC_FORBIDDEN, "You do not have permission to access this resource.");
+                            sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "You do not have permission to access this resource.");
                         })
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -50,6 +55,15 @@ public class SecurityConfig {
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json");
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("status", String.valueOf(status));
+        errorResponse.put("message", message);
+        response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
     }
 
     @Bean

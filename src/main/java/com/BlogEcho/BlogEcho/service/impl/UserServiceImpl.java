@@ -1,5 +1,6 @@
 package com.BlogEcho.BlogEcho.service.impl;
 
+import com.BlogEcho.BlogEcho.dto.EmailDto;
 import com.BlogEcho.BlogEcho.dto.UserDto;
 import com.BlogEcho.BlogEcho.enums.Role;
 import com.BlogEcho.BlogEcho.exceptions.InvalidOtpException;
@@ -7,6 +8,7 @@ import com.BlogEcho.BlogEcho.exceptions.UserAlreadyExistsException;
 import com.BlogEcho.BlogEcho.exceptions.UserNotFoundException;
 import com.BlogEcho.BlogEcho.model.User;
 import com.BlogEcho.BlogEcho.repo.UserRepo;
+import com.BlogEcho.BlogEcho.service.EmailService;
 import com.BlogEcho.BlogEcho.service.UserService;
 import com.BlogEcho.BlogEcho.util.JwtUtil;
 import org.slf4j.Logger;
@@ -33,15 +35,17 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender javaMailSender;
     private final JwtUtil jwtUtil;
+    private final EmailService emailService;
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 
     @Autowired
-    public UserServiceImpl(UserRepo userRepo, PasswordEncoder passwordEncoder, JavaMailSender javaMailSender, JwtUtil jwtUtil) {
+    public UserServiceImpl(UserRepo userRepo, PasswordEncoder passwordEncoder, JavaMailSender javaMailSender, JwtUtil jwtUtil, EmailService emailService) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
         this.javaMailSender = javaMailSender;
         this.jwtUtil = jwtUtil;
+        this.emailService = emailService;
     }
 
     @Override
@@ -115,7 +119,6 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), new ArrayList<>());
     }
-
 
     @Override
     public List<UserDto> getAllUsers() {
@@ -201,6 +204,11 @@ public class UserServiceImpl implements UserService {
             user.setOtpExpiryTime(null);
             user.setEnabled(true);
             userRepo.save(user);
+
+            //Send welcome email
+            String message = String.format("Hello %s,\n\nWelcome to BlogEcho, a vibrant platform where the boundaries of learning and sharing are limitless. Here, you'll find an endless opportunity to expand your knowledge and engage with a community eager to exchange insights and ideas.", user.getUsername());
+            EmailDto emailDto = new EmailDto(user.getEmail(), "Welcome to BlogEcho", message);
+            emailService.sendEmail(emailDto);
         }
         return isValid;
     }

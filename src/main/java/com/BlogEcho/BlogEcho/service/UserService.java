@@ -26,8 +26,8 @@ public interface UserService {
     String login(String email, String password);
 
 
-//    User findById(Long authorId);
     Optional<User> findById(Long id);
 
     UserDetails loadUserByUsername(String username);
+
 }
