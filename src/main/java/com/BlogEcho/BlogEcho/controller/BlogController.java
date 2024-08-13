@@ -34,7 +34,7 @@ public class BlogController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Map<String, Object>> createBlog(@Valid @RequestBody BlogDto blogDto, BindingResult bindingResult) {
+    public ResponseEntity<Map<String, Object>> createBlog(@Valid @ModelAttribute BlogDto blogDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return handleValidationErrors(bindingResult);
         }
@@ -56,7 +56,7 @@ public class BlogController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> updateBlog(@PathVariable Long id, @Valid @RequestBody BlogDto blogDto, BindingResult bindingResult) {
+    public ResponseEntity<Map<String, Object>> updateBlog(@PathVariable Long id, @Valid @ModelAttribute BlogDto blogDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return handleValidationErrors(bindingResult);
         }
